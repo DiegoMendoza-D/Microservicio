@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import axios from "axios";
+
 
 dotenv.config();
 
@@ -18,21 +20,28 @@ app.get('/test', (req, res) => {
 });
 
 // Ruta para probar la conexión con el servicio de productos
-app.get('/', async (req, res) => {
-    try {
-        const response = await fetch('http://localhost:3001/test');
-        const data = await response.json();
-        res.json({
-            gateway_message: 'Conexión exitosa desde API Gateway',
-            productos_response: data
-        });
-    } catch (error: any) { // Especificamos el tipo any para el error
-        res.status(500).json({ 
-            error: 'Error al conectar con el servicio de productos',
-            details: error?.message || 'Error desconocido'
-        });
+
+app.get("/productos", async (req, res) => {
+    try { 
+      const response = await axios.get("http://localhost:3001/productos/all"); 
+      res.json(response.data);
+    } catch (error) {
+      console.error("Error al obtener productos:", error);
+      res.status(500).send("Error al obtener productos");
     }
-});
+  });
+  
+  // Redirigir a usuarios
+  app.get("/usuarios", async (req, res) => {
+    try {
+      const response = await axios.get("http://localhost:3002/usuario/all");
+      res.json(response.data); 
+    } catch (error) {
+      console.error("Error al obtener usuarios:", error);
+      res.status(500).send("Error al obtener usuarios");
+    }
+  });
+  
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
